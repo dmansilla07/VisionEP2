@@ -1,0 +1,12 @@
+import cv2
+import numpy as np
+import matplotlib as plt
+
+img = cv2.imread('leopard_noise.png')
+
+cv2.imshow('Leopard' , img)
+cv2.waitKey(0)
+
+fimg = np.fft.fft2(img)
+cv2.imshow('Leopard' , fimg)
+cv2.waitKey(0)
