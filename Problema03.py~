@@ -1,0 +1,6 @@
+import cv2
+import numpy as np
+import siamxt
+from matplotlib import pyplot as plt
+
+img = cv2.imread('fruit.png', 0)
