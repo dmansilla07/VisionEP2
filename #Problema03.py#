@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import siamxt
-
 from matplotlib import pyplot as plt
 
 dx = [1, 1, -1, -1, 0, 1, 0, -1]
