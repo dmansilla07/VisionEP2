@@ -14,20 +14,30 @@ def valid(i, j, rows, cols):
         return 0
 
 def computeMinimumRegionais(img):
+    img_final = img.copy()
     rows, cols = img.shape
     for i in range(0, rows):
         for j in range(0, cols):
-            for r in range(0, 8):
-                u = i + dx[r]
-                v = j + dy[r]
-                val = 1
-                if (valid(u, v, rows, cols) == 1):
-                    if (img[u][v] < img[i][j]):
-                        val = 0
-                if (val == 1):
-                    img[i][j] = 0
-    return img
+            if (img[i][j] == 0):
+                img_final[i][j] = 0
+            else:
+                img_final[i][j] = 1
+    return img_final
 
+def markToC(x, maxi, mini):
+    return (1.0*x-mini)*(256.0/(maxi-mini))
+
+def colorShit(img, markers):
+    img_final = img.copy()
+    rows, cols = img.shape
+    maxi = markers.max()
+    mini = markers.min()
+    for i in range(0, rows):
+        for j in range(0, cols):
+            img_final[i][j] = markToC(markers[i][j], maxi, mini)
+    return img_final
+
+imgW = cv2.imread('knee.pgm')
 img = cv2.imread('knee.pgm', 0)
 img_max = img.max()
 neg_img = img_max - img
@@ -37,22 +47,46 @@ kernel[0][0] = kernel[2][0] = 0
 kernel[1][1] = kernel[0][2] = kernel[2][2] = 0
 
 gradient = cv2.morphologyEx(img, cv2.MORPH_GRADIENT, kernel)
+ImgMax = gradient.max()
+gray = ImgMax - gradient
 
 Bc = np.ones((3,3),dtype = bool)
 
-mxt = siamxt.MaxTreeAlpha(img, Bc)
+mxt = siamxt.MaxTreeAlpha(gray, Bc)
 
 V = mxt.computeVolume()
+H = mxt.computeHeight()
 Vext = mxt.computeExtinctionValues(V, "volume")
+Hext = mxt.computeExtinctionValues(H, "height")
+
 mxt.extinctionFilter(Vext, 8)
+#mxt.extinctioxnFilter(Hext, 8)
 
-img_filtered = mxt.getImage()
-img_filtered = computeMinimumRegionais(img_filtered)
+img_filtered = ImgMax - mxt.getImage()
+#img_filtered = (img_filtered)
 
-mmgraphviz(mxt.generateCCGraph(parent_scale = True))
+ret, thresh = cv2.threshold(img_filtered, 0, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
 
-plt.subplot(121),plt.imshow(img, cmap = 'gray')
+cv2.imshow('a', thresh)
+cv2.waitKey(0)
+
+
+ret, markers = cv2.connectedComponents(thresh)
+
+img2 = colorShit(img_filtered, markers)
+cv2.imshow('a', img2)
+cv2.waitKey(0)
+
+markers = cv2.watershed(imgW,markers)
+imgW[markers == -1] = [255,0,0]
+cv2.imshow('a', imgW)
+cv2.waitKey(0)
+
+
+"""
+plt.subplot(121),plt.imshow(gradient, cmap = 'gray')
 plt.title('Input Image'), plt.xticks([]), plt.yticks([])
 plt.subplot(122),plt.imshow(img_filtered,  cmap = 'gray')
 plt.title('Gradient'), plt.xticks([]), plt.yticks([])
 plt.show()
+"""
