@@ -10,12 +10,31 @@ def removeFiosCabelo(img):
     return erosion
 
 def filtroLetras(img):
-    gray = img
+    gray = img.max() - img
     Bc = np.ones((3,3),dtype = bool)
     mxt = siamxt.MaxTreeAlpha(gray, Bc)
-    V = mxt.computeVolume()
-    ext = mxt.computeExtinctionValues(V, "volume")
-    mxt.extinctionFilter(ext, 10)
+
+    #Size and shape thresholds
+    Wmin, Wmax = 8 ,65   
+    Hmin, Hmax = 23 ,65
+    rr = 0.10
+    
+    #Computing bounding-box lengths from the
+    #attributes stored in NA
+    dy = mxt.node_array[7,:] - mxt.node_array[6,:]
+    dx = mxt.node_array[10,:] - mxt.node_array[9,:]
+    area = mxt.node_array[3,:]
+    RR = 1.0*area/(dx*dy)
+    
+    height = mxt.computeHeight()
+    gray_var = mxt.computeNodeGrayVar()
+    
+    #Selecting nodes that fit the criteria
+    nodes = (dy > Hmin) & (dy < Hmax) & (dx > Wmin) & (dx < Wmax) & (RR > rr) & (gray_var < 15**2) & (dy*2.0 > dx) & (dx*4.0 > dy) & (height > 35)
+
+    #Filtering
+    mxt.contractDR(nodes)
+
     imgFiltered = mxt.getImage()
     return imgFiltered
 
