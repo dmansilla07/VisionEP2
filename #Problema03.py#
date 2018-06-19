@@ -13,10 +13,21 @@ def valid(i, j, rows, cols):
     else:
         return 0
 
+def computeMinimumRegionais(img):
+    img_final = img.copy()
+    rows, cols = img.shape
+    for i in range(0, rows):
+        for j in range(0, cols):
+            if (img[i][j] == 0):
+                img_final[i][j] = 0
+            else:
+                img_final[i][j] = 1
+    return img_final
+
 def markToC(x, maxi, mini):
     return (1.0*x-mini)*(256.0/(maxi-mini))
 
-def colorFunction(img, markers):
+def colorShit(img, markers):
     img_final = img.copy()
     rows, cols = img.shape
     maxi = markers.max()
@@ -62,11 +73,20 @@ cv2.waitKey(0)
 
 ret, markers = cv2.connectedComponents(thresh)
 
-img2 = colorFunction(img_filtered, markers)
+img2 = colorShit(img_filtered, markers)
 cv2.imshow('a', img2)
 cv2.waitKey(0)
 
 markers = cv2.watershed(imgW,markers)
-imgW[markers == -1] = [255,0,0]
+imgWarkers == -1] = [255,0,0]
 cv2.imshow('a', imgW)
 cv2.waitKey(0)
+
+
+"""
+plt.subplot(121),plt.imshow(gradient, cmap = 'gray')
+plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+plt.subplot(122),plt.imshow(img_filtered,  cmap = 'gray')
+plt.title('Gradient'), plt.xticks([]), plt.yticks([])
+plt.show()
+"""

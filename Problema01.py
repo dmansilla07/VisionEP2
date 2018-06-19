@@ -118,37 +118,29 @@ def media(img, mat):
             x = x + 2*r + 1
     return img
 
+def applyFilterToImg(img, ver, D):
+    fimg = np.fft.fft2(img)
+    ffimg = np.fft.fftshift(fimg)
+    rows, cols = img.shape
+    H = gaussianMatrix(rows, cols, D) #55
+    if (ver == "lowpass"):
+        H = lowpassFilter(rows, cols, D) #70
+    else:
+        if(ver == "butterworth"):
+            H = butterworthMatrix(rows, cols, D)#70
+    
+    ffimgr = np.multiply(ffimg, H)
 
+    f_ishift = np.fft.ifftshift(ffimgr)
+    img_back = np.fft.ifft2(f_ishift)
+    img_back = np.abs(img_back)
+    return img_back
+    
 
 img = cv2.imread('leopard_noise.png', 0)
-fimg = np.fft.fft2(img)
-ffimg = np.fft.fftshift(fimg)
-#ffimg = fimg
+img_back = applyFilterToImg(img, "lowpass", 70)
+img_back2 = applyFilterToImg(img, "gaussian", 55)
 
-ms = 20*np.log(np.abs(ffimg))
-ms1 = np.log(np.abs(ffimg))
-
-rows, cols = img.shape
-
-H1 = gaussianMatrix(rows, cols, 55)
-ffimgr2 = np.multiply(ffimg, H1)
-
-
-f_ishift2 = np.fft.ifftshift(ffimgr2)
-img_back2 = np.fft.ifft2(f_ishift2)
-img_back2 = np.abs(img_back2)
-
-H2 = lowpassFilter(rows,cols,70)
-H3 = butterworthMatrix(rows,cols, 70)
-print(ffimg[0][0])
-
-ffimgr = np.multiply(ffimg, H3)
-
-print(ffimgr[0][0])
-
-f_ishift = np.fft.ifftshift(ffimgr)
-img_back = np.fft.ifft2(f_ishift)
-img_back = np.abs(img_back)
 
 plt.subplot(131),plt.imshow(img, cmap = 'gray')
 plt.title('Input Image'), plt.xticks([]), plt.yticks([])
