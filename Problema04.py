@@ -14,13 +14,10 @@ def filtroLetras(img):
     Bc = np.ones((3,3),dtype = bool)
     mxt = siamxt.MaxTreeAlpha(gray, Bc)
 
-    #Size and shape thresholds
-    Wmin, Wmax = 8 ,65   
-    Hmin, Hmax = 23 ,65
-    rr = 0.10
-    
-    #Computing bounding-box lengths from the
-    #attributes stored in NA
+    Wmin, Wmax = 10 , 50
+    Hmin, Hmax = 10 ,50
+    rr = 0.20
+
     dy = mxt.node_array[7,:] - mxt.node_array[6,:]
     dx = mxt.node_array[10,:] - mxt.node_array[9,:]
     area = mxt.node_array[3,:]
@@ -29,8 +26,7 @@ def filtroLetras(img):
     height = mxt.computeHeight()
     gray_var = mxt.computeNodeGrayVar()
     
-    #Selecting nodes that fit the criteria
-    nodes = (dy > Hmin) & (dy < Hmax) & (dx > Wmin) & (dx < Wmax) & (RR > rr) & (gray_var < 15**2) & (dy*2.0 > dx) & (dx*4.0 > dy) & (height > 35)
+    nodes = (dy > Hmin) & (dy < Hmax) & (dx > Wmin) & (dx < Wmax) & (RR > rr) & (gray_var < 15**2) & (dy*2.0 > dx) & (dx*4.0 > dy) & (height > 10)
 
     #Filtering
     mxt.contractDR(nodes)
@@ -38,12 +34,14 @@ def filtroLetras(img):
     imgFiltered = mxt.getImage()
     return imgFiltered
 
-img = cv2.imread('revista_fapesp.png', 0)
-img = removeFiosCabelo(img)
-imgFiltered = filtroLetras(img)
+img = cv2.imread('revista_fapesp.png')
+img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+imgSemCab = removeFiosCabelo(img)
+imgFiltered = filtroLetras(imgSemCab)
 
-plt.subplot(121),plt.imshow(img, cmap = 'gray')
-plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+plt.subplot(121),plt.imshow(imgSemCab, cmap = 'gray')
+plt.title('Image Sem Cabelos'), plt.xticks([]), plt.yticks([])
+
 plt.subplot(122),plt.imshow(imgFiltered,  cmap = 'gray')
 plt.title('Filtered'), plt.xticks([]), plt.yticks([])
 plt.show()
